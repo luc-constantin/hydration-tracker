@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Hydration Tracker</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Favicon -->
+  <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
+
+  <!-- Apple Web App Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Hydration">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Apple Icons -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <!-- Apple Splash Screens -->
+  <link rel="apple-touch-startup-image" href="icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
+  <link rel="apple-touch-startup-image" href="icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+  <link rel="apple-touch-startup-image" href="icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="icons/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="icons/splash-828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
+  <link rel="apple-touch-startup-image" href="icons/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+  <link rel="apple-touch-startup-image" href="icons/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1> Hydration Tracker</h1>
+    <p>Log your daily water intake & stay healthy</p>
+  </header>
+
+  <section class="summary">
+    <div class="summary__goal">
+      Goal: <span id="goal-label">0 ml</span>
+    </div>
+    <div class="summary__next">
+      Next reminder: <span id="next-reminder">—</span>
+    </div>
+    <button class="btn small" id="open-settings">⚙️ Settings</button>
+    <button class="btn small outline" id="reset-now">↺ Reset today</button>
+  </section>
+
+  <section class="progress-section">
+    <div class="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <p id="consumed">0 ml / 0 ml</p>
+  </section>
+
+  <main>
+    <div class="water-buttons">
+      <button class="btn" onclick="logWater(250)">+ 250 ml</button>
+      <button class="btn" onclick="logWater(300)">+ 300 ml</button>
+      <button class="btn" onclick="logWater(500)">+ 500 ml</button>
+    </div>
+
+    <div class="reminder-section">
+      <button class="btn" id="notify-btn"> Enable Reminders</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>Made with ♡ by Luc Constantin</p>
+  </footer>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal__card">
+      <div class="modal__head">
+        <h2>Settings</h2>
+        <button class="icon-btn" id="close-settings" aria-label="Close">✖️</button>
+      </div>
+      <div class="modal__body">
+        <label class="label">Daily Goal (ml)</label>
+        <input type="number" id="daily-goal" min="500" step="100" placeholder="e.g. 3000">
+
+        <label class="label">Remind me every (hours)</label>
+        <input type="number" id="interval" min="1" max="12" step="1" placeholder="e.g. 2">
+
+        <label class="checkbox">
+          <input type="checkbox" id="start-window-enabled">
+          Limit reminders to a daily window
+        </label>
+
+        <div class="row">
+          <div>
+            <label class="label">Start (HH:MM)</label>
+            <input type="time" id="window-start" value="08:00">
+          </div>
+          <div>
+            <label class="label">End (HH:MM)</label>
+            <input type="time" id="window-end" value="20:00">
+          </div>
+        </div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn outline" id="save-settings">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

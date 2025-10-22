@@ -1,8 +1,9 @@
 // ---- Persistent state ----
+// Keeps user settings and daily progress saved between sessions
 const state = {
   dailyGoal: parseInt(localStorage.getItem('dailyGoal')) || 0,
   totalConsumed: parseInt(localStorage.getItem('totalConsumed')) || 0,
-  intervalHours: parseInt(localStorage.getItem('intervalHours')) || 0,
+  intervalMinutes: parseInt(localStorage.getItem('intervalMinutes')) || 0, // changed from intervalHours
   startWindowEnabled: JSON.parse(localStorage.getItem('startWindowEnabled') || 'false'),
   windowStart: localStorage.getItem('windowStart') || '08:00',
   windowEnd: localStorage.getItem('windowEnd') || '20:00',
@@ -10,46 +11,48 @@ const state = {
   scheduledTimeouts: []
 };
 
-// ---- Service worker ----
+// ---- Register service worker for PWA ----
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
 
+// ---- Initialize app when page is loaded ----
 window.addEventListener('DOMContentLoaded', () => {
   maybeResetForNewDay();
 
-  // Wire UI
+  // Bind UI buttons
   document.getElementById('open-settings').addEventListener('click', openSettings);
   document.getElementById('close-settings').addEventListener('click', closeSettings);
   document.getElementById('save-settings').addEventListener('click', saveSettings);
   document.getElementById('reset-now').addEventListener('click', resetToday);
   document.getElementById('notify-btn').addEventListener('click', enableReminders);
 
-  // Init inputs
+  // Load saved settings into inputs
   document.getElementById('daily-goal').value = state.dailyGoal || '';
-  document.getElementById('interval').value = state.intervalHours || '';
+  document.getElementById('interval').value = state.intervalMinutes || '';
   document.getElementById('start-window-enabled').checked = !!state.startWindowEnabled;
   document.getElementById('window-start').value = state.windowStart;
   document.getElementById('window-end').value = state.windowEnd;
 
+  // Initialize progress bar, summary, and timers
   updateProgress();
   renderSummary();
   scheduleAutoResetTimer();
   rescheduleNotificationsPreviewOnly();
 });
 
-// ---- Core hydration logic ----
+// ---- Add logged water amount & trigger Apple Shortcut ----
 function logWater(amount) {
   state.totalConsumed += amount;
   persist();
   updateProgress();
 
-  // Trigger Apple Shortcut to log into HealthKit
   const shortcutName = 'LogWater';
   const url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}&input=${amount}`;
   window.location.href = url;
 }
 
+// ---- Update UI progress bar and text ----
 function updateProgress() {
   const progress =
     state.dailyGoal > 0
@@ -60,26 +63,28 @@ function updateProgress() {
   document.getElementById('goal-label').innerText = `${state.dailyGoal} ml`;
 }
 
-// ---- Settings modal ----
+// ---- Open settings modal ----
 function openSettings() {
   document.getElementById('settings-modal').classList.remove('hidden');
   document.getElementById('settings-modal').setAttribute('aria-hidden', 'false');
 }
 
+// ---- Close settings modal ----
 function closeSettings() {
   document.getElementById('settings-modal').classList.add('hidden');
   document.getElementById('settings-modal').setAttribute('aria-hidden', 'true');
 }
 
+// ---- Save settings and reschedule notifications ----
 function saveSettings() {
   const goal = parseInt(document.getElementById('daily-goal').value);
-  const interval = parseInt(document.getElementById('interval').value);
+  const interval = parseInt(document.getElementById('interval').value); // now in minutes
   const startEnabled = document.getElementById('start-window-enabled').checked;
   const start = document.getElementById('window-start').value || '08:00';
   const end = document.getElementById('window-end').value || '20:00';
 
   if (!isNaN(goal) && goal > 0) state.dailyGoal = goal;
-  if (!isNaN(interval) && interval > 0) state.intervalHours = interval;
+  if (!isNaN(interval) && interval > 0) state.intervalMinutes = interval;
   state.startWindowEnabled = startEnabled;
   state.windowStart = start;
   state.windowEnd = end;
@@ -91,7 +96,7 @@ function saveSettings() {
   closeSettings();
 }
 
-// ---- Reset logic ----
+// ---- Manual reset of daily progress ----
 function resetToday() {
   state.totalConsumed = 0;
   state.lastResetISO = todayISO();
@@ -101,6 +106,7 @@ function resetToday() {
   toast('Progress reset for today.');
 }
 
+// ---- Automatic reset at midnight ----
 function maybeResetForNewDay() {
   const today = todayISO();
   if (state.lastResetISO !== today) {
@@ -110,21 +116,20 @@ function maybeResetForNewDay() {
   }
 }
 
+// ---- Schedule auto-reset at midnight ----
 function scheduleAutoResetTimer() {
   if (state._midnightTimer) clearTimeout(state._midnightTimer);
-
   const now = new Date();
   const nextMidnight = new Date(now);
   nextMidnight.setHours(24, 0, 0, 0);
   const ms = nextMidnight - now;
-
   state._midnightTimer = setTimeout(() => {
     resetToday();
     scheduleAutoResetTimer();
   }, ms);
 }
 
-// ---- Notifications ----
+// ---- Ask permission and enable reminders ----
 function enableReminders() {
   Notification.requestPermission().then(permission => {
     if (permission !== 'granted') {
@@ -135,11 +140,12 @@ function enableReminders() {
   });
 }
 
+// ---- Schedule all notifications for the current day ----
 function scheduleTodayNotifications() {
   state.scheduledTimeouts.forEach(id => clearTimeout(id));
   state.scheduledTimeouts = [];
 
-  if (!state.intervalHours || state.intervalHours <= 0) {
+  if (!state.intervalMinutes || state.intervalMinutes <= 0) {
     toast('Set a reminder interval in Settings first.');
     return;
   }
@@ -152,7 +158,7 @@ function scheduleTodayNotifications() {
 
   let i = 0;
   while (true) {
-    if (i > 0) next = new Date(next.getTime() + state.intervalHours * 60 * 60 * 1000);
+    if (i > 0) next = new Date(next.getTime() + state.intervalMinutes * 60 * 1000);
     i++;
 
     if (state.startWindowEnabled && next > startEnd.end) break;
@@ -176,19 +182,21 @@ function scheduleTodayNotifications() {
   toast("Today's reminders scheduled.");
 }
 
+// ---- Preview of next reminder time ----
 function rescheduleNotificationsPreviewOnly() {
   const now = new Date();
   const startEnd = getWindowBoundsForToday();
   let next = new Date(now);
   if (state.startWindowEnabled && next < startEnd.start) next = new Date(startEnd.start);
-  if (state.intervalHours > 0) {
-    next = new Date(next.getTime() + state.intervalHours * 60 * 60 * 1000);
+  if (state.intervalMinutes > 0) {
+    next = new Date(next.getTime() + state.intervalMinutes * 60 * 1000);
   } else {
     next = null;
   }
   renderSummary(next);
 }
 
+// ---- Get start & end time boundaries for reminder window ----
 function getWindowBoundsForToday() {
   const [sh, sm] = (state.windowStart || '08:00').split(':').map(n => parseInt(n, 10));
   const [eh, em] = (state.windowEnd || '20:00').split(':').map(n => parseInt(n, 10));
@@ -198,14 +206,14 @@ function getWindowBoundsForToday() {
   return { start, end };
 }
 
-// ---- UI helpers ----
+// ---- Update UI label for next reminder time ----
 function renderSummary(nextTime = null) {
   const label = document.getElementById('next-reminder');
-  if (state.intervalHours > 0) {
+  if (state.intervalMinutes > 0) {
     const now = new Date();
     if (!nextTime) {
       const startEnd = getWindowBoundsForToday();
-      let next = new Date(now.getTime() + state.intervalHours * 60 * 60 * 1000);
+      let next = new Date(now.getTime() + state.intervalMinutes * 60 * 1000);
       if (state.startWindowEnabled && next < startEnd.start) next = startEnd.start;
       nextTime = next;
     }
@@ -215,10 +223,12 @@ function renderSummary(nextTime = null) {
   }
 }
 
+// ---- Simple toast logger ----
 function toast(msg) {
   console.log(msg);
 }
 
+// ---- Format Date object into HH:MM ----
 function formatTime(d) {
   if (!(d instanceof Date)) return '—';
   const h = String(d.getHours()).padStart(2, '0');
@@ -226,16 +236,18 @@ function formatTime(d) {
   return `${h}:${m}`;
 }
 
+// ---- Save current state to localStorage ----
 function persist() {
   localStorage.setItem('dailyGoal', state.dailyGoal);
   localStorage.setItem('totalConsumed', state.totalConsumed);
-  localStorage.setItem('intervalHours', state.intervalHours);
+  localStorage.setItem('intervalMinutes', state.intervalMinutes);
   localStorage.setItem('startWindowEnabled', JSON.stringify(state.startWindowEnabled));
   localStorage.setItem('windowStart', state.windowStart);
   localStorage.setItem('windowEnd', state.windowEnd);
   localStorage.setItem('lastResetISO', state.lastResetISO);
 }
 
+// ---- Helper: returns current date as YYYY-MM-DD ----
 function todayISO() {
   const d = new Date();
   return d.toISOString().slice(0, 10);

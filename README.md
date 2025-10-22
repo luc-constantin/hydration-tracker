@@ -1,17 +1,52 @@
 # Hydration Tracker PWA
 
-A minimal hydration tracker built with plain HTML, CSS, and JavaScript.  
-It is installable as a Progressive Web App (PWA) and integrates with Apple Shortcuts to log water intake into the Health app.
-
-[Install the PWA app here](https://luc-constantin.github.io/hydration-tracker/)
+Hydration Tracker is a simple Progressive Web App (PWA) designed to help you log your daily water intake.  
+It can be installed on iPhone as a PWA and integrated with the Apple Health app through a custom iOS Shortcut.
 
 ---
 
-## Features
+## Live App
 
-- Set a daily water intake goal
-- Log water intake in predefined amounts
-- Schedule reminders during the day
-- Log water directly into Apple Health using a Shortcut
-- Auto-reset at midnight
-- Works offline after first load
+[https://luc-constantin.github.io/hydration-tracker/](https://luc-constantin.github.io/hydration-tracker/)
+
+---
+
+## 1. How to Install on iPhone (iOS 18)
+
+1. Open the link above in Safari on your iPhone.  
+2. Tap the **Share** icon at the bottom of the screen.  
+3. Choose **Add to Home Screen**.  
+4. Tap **Add**.  
+5. The app will appear on your iPhone home screen like a native app.
+
+---
+
+## 2. How to Create the “LogWater” Shortcut (iOS 18)
+
+This shortcut allows the app to send water intake values directly to Apple Health.
+
+### Steps:
+1. Open the **Shortcuts** app.  
+2. Tap the **“+”** button to create a new shortcut.  
+3. Name the shortcut exactly: **LogWater**.  
+4. Add the action **Log Health Sample**.  
+   - Type: `Water`  
+   - Value: `Shortcut Input`  
+   - Unit: `mL`  
+   - Date: `Current Date`  
+5. Add the action **Stop and Output** and set output to **Health Sample**.  
+6. Save the shortcut by tapping **Done**.
+
+Your shortcut should look like this:
+
+![LogWater Shortcut Example](./IMG_2599.jpg)
+
+---
+
+## 3. Development Setup
+
+Clone and run the project locally:
+
+```bash
+git clone https://github.com/luc-constantin/hydration-tracker.git
+cd hydration-tracker

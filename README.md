@@ -3,7 +3,7 @@
 A minimal hydration tracker built with plain HTML, CSS, and JavaScript.  
 It is installable as a Progressive Web App (PWA) and integrates with Apple Shortcuts to log water intake into the Health app.
 
-[Install the PWA app here](https://github.com/luc-constantin.github.io/hydration-tracker/)
+[Install the PWA app here](https://luc-constantin.github.io/hydration-tracker/)
 
 ---
 

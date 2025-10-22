@@ -87,7 +87,7 @@ function saveSettings() {
   const end = document.getElementById('window-end').value || '20:00';
 
   if (!isNaN(goal) && goal > 0) state.dailyGoal = goal;
-  if (!isNaN(interval) && interval > 0) state.intervalMinutes = interval;
+if (!isNaN(interval) && interval > 0) state.intervalMinutes = interval * 60; // convert hours → minutes
   state.startWindowEnabled = startEnabled;
   state.windowStart = start;
   state.windowEnd = end;

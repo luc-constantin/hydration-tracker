@@ -1,4 +1,4 @@
-: root {
+:root {
   --bg: #000;
   --text: #fff;
   --muted: #9aa0a6;
@@ -9,7 +9,7 @@
 }
 
 html, body {
-  background-color: #000;
+  background-color: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
@@ -142,22 +142,3 @@ input[type="number"], input[type="time"] {
 
 .checkbox { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; color: var(--muted); }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* Wave Progress Effect */
-#progress-bar {
-  height: 18px;
-  width: 0%;
-  background-color: #000; 
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 28' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q 30 20 60 10 T 120 10 V 28 H 0 Z' fill='%231a9fd9'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-size: 120px 28px;
-  background-position: 0 100%;
-  animation: waveMove 3s linear infinite;
-  transition: width 0.3s ease;
-}
-
-/* Wave animation */
-@keyframes waveMove {
-  from { background-position-x: 0; }
-  to { background-position-x: -120px; }
-}

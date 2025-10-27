@@ -25,8 +25,7 @@ This project is a lightweight Progressive Web App (PWA) designed to help users t
 
 ## Preview
 
-![App Preview](https://github.com/luc-constantin/hydration-tracker/issues/1#issuecomment-3449991324)
----
+![App Preview](https://github.com/user-attachments/assets/f326fe25-8f1f-46bc-8bee-8f90517d6a37)
 
 ## Features
 - Reminder system that does not shift when the app is reopened.  

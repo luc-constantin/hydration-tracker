@@ -25,7 +25,7 @@ This project is a lightweight Progressive Web App (PWA) designed to help users t
 
 ## Preview
 
-![App Preview](https://github.com/luc-constantin/hydration-tracker/issues/1)
+![App Preview](https://github.com/luc-constantin/hydration-tracker/issues/1)](https://github.com/luc-constantin/hydration-tracker/issues/1#issuecomment-3449991324)
 
 ---
 
